@@ -39,7 +39,7 @@ docker: static ## Builds a docker image
 static: ## Builds a static executable
 	@echo "+ $@"
 	 $(GO) build \
-		-tags "$(BUILDTAGS) static_build" \
+		-tags " netgo $(BUILDTAGS) static_build" \
 		${GO_LDFLAGS_STATIC} -o $(NAME) .
 
 all: clean build test   ## Runs a clean, build, fmt, lint, test, staticcheck, vet and install
