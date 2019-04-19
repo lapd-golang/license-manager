@@ -8,4 +8,5 @@ require (
 	github.com/go-chi/render v1.0.1
 	github.com/jinzhu/gorm v1.9.4
 	github.com/sirupsen/logrus v1.4.1
+	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
 )
