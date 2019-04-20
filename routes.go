@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/sevren/test/storage"
 
 	"github.com/go-chi/chi"
@@ -9,6 +11,8 @@ import (
 
 	"github.com/go-chi/render"
 )
+
+type EmptyResponse struct{}
 
 func Routes(store storage.ItemStore) (*chi.Mux, error) {
 
@@ -19,14 +23,20 @@ func Routes(store storage.ItemStore) (*chi.Mux, error) {
 	r.Use(middleware.Logger)
 
 	r.Route("/{user}", func(r chi.Router) {
-		r.Post("/", store.User)
+		r.Post("/", handleUser)
 		r.Route("/licenses", func(r chi.Router) {
 			r.Use(store.AuthUser)
-			r.Post("/", store.Licenses)
+			r.Post("/", store.HandleLicenses)
 		})
 	})
 
 	return r, nil
+}
+
+// handles the use case for a simple /{user} rest call
+func handleUser(w http.ResponseWriter, r *http.Request) {
+	render.Status(r, http.StatusBadRequest)
+	render.JSON(w, r, EmptyResponse{})
 }
 
 func corsConfig() *cors.Cors {

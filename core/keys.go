@@ -1,9 +1,10 @@
-package helpers
+package core
 
 import (
 	"encoding/base64"
 )
 
+// Generates Challenge1 licenses
 func GenerateLicenses(refs []string) []string {
 	licenses := []string{}
 	for _, license := range refs {

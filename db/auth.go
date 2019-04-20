@@ -33,7 +33,7 @@ func (d *Dao) AuthUser(next http.Handler) http.Handler {
 			return
 		}
 		fmt.Printf("FROM DB: %v", u)
-		ctx := context.WithValue(r.Context(), "licenses", u.Lics)
+		ctx := context.WithValue(r.Context(), "user", u.Username)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

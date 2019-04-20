@@ -5,7 +5,9 @@ import (
 )
 
 type ItemStore interface {
-	User(http.ResponseWriter, *http.Request)
-	Licenses(http.ResponseWriter, *http.Request)
+	StoreUsedLicenses(string)
+	GetLicenses(string) ([]string, error)
+
+	HandleLicenses(http.ResponseWriter, *http.Request)
 	AuthUser(http.Handler) http.Handler
 }
