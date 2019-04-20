@@ -11,6 +11,7 @@ import (
 const reconn = 1
 const table = "user_licenses"
 
+// Connect - Attempts to connect to the database
 func Connect(db string) (*Dao, error) {
 
 	log.WithFields(log.Fields{
