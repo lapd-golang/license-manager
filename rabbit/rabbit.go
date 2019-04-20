@@ -63,7 +63,7 @@ func Connect(amqpURI string) (*RMQConn, error) {
 	failOnError(err, "Error declaring the Queue")
 
 	log.Printf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
-		q.Name, q.Messages, q.Consumers, "go-test-key")
+		q.Name, q.Messages, q.Consumers, "a-key")
 
 	err = ch.QueueBind(
 		q.Name,   // name of the queue
@@ -74,7 +74,7 @@ func Connect(amqpURI string) (*RMQConn, error) {
 	)
 	failOnError(err, "Error binding to the Queue")
 
-	log.Printf("Queue bound to Exchange, starting Consume (consumer tag %q)", "go-amqp-example")
+	log.Printf("Queue bound to Exchange, starting Consume (consumer tag %q)", "license-manager")
 
 	return &RMQConn{ch, q, EXCHANGE}, nil
 }
@@ -83,7 +83,7 @@ func (c *RMQConn) Consume() <-chan amqp.Delivery {
 	var replies <-chan amqp.Delivery
 	replies, err := c.ch.Consume(
 		c.q.Name,          // queue
-		"go-amqp-example", // consumer
+		"license-manager", // consumer
 		true,              // auto-ack
 		false,             // exclusive
 		false,             // no-local
@@ -99,8 +99,12 @@ func (c *RMQConn) Consume() <-chan amqp.Delivery {
 func (c *RMQConn) Handle(deliveries <-chan amqp.Delivery, dbc *db.Dao) {
 
 	for d := range deliveries {
+
+		// call the database handler to insert the used code
 		m := Msg{}
 		json.Unmarshal(d.Body, &m)
+		dbc.StoreUsedLicenses(m.Code)
+
 		log.Infof("%s", m.Code)
 		log.Printf(
 			"got %dB delivery: [%v] %s",
