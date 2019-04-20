@@ -3,19 +3,21 @@ package db
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/sevren/test/models"
-	log "github.com/sirupsen/logrus"
 )
 
 type PostReq struct {
 	Password string `json:"password"`
 }
 
-// Should lookup the user from the databse here
+// Middleware to handle user Authentication from the database. This will run before every REST request
+
+// Using the existing database connection we check to see if the posted user successfully authenticated
+// if sucessful the request is passed down the chain to the function handling the call
+// if unsucessful the request is shutdown immediatly
 func (d *Dao) AuthUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
@@ -24,7 +26,7 @@ func (d *Dao) AuthUser(next http.Handler) http.Handler {
 		if err != nil {
 			panic(err)
 		}
-		log.Println(p.Password)
+
 		user := chi.URLParam(r, "user")
 
 		u := models.User_licenses{}
@@ -32,7 +34,7 @@ func (d *Dao) AuthUser(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
-		fmt.Printf("FROM DB: %v", u)
+
 		ctx := context.WithValue(r.Context(), "user", u.Username)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
