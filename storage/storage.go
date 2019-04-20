@@ -5,7 +5,7 @@ import (
 )
 
 type ItemStore interface {
-	StoreUsedLicenses(string)
+	StoreUsedLicenses(string) error
 	GetLicenses(string) ([]string, error)
 
 	HandleLicenses(http.ResponseWriter, *http.Request)
