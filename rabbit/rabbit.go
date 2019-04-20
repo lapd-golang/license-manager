@@ -2,7 +2,6 @@ package rabbit
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/sevren/test/db"
 	log "github.com/sirupsen/logrus"
@@ -21,10 +20,9 @@ type Msg struct {
 	Code string `json:"code"`
 }
 
-func failOnError(err error, msg string) {
+func warnOnError(err error, msg string) {
 	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
-		panic(fmt.Sprintf("%s: %s", msg, err))
+		log.Warnf("%s: %s", msg, err)
 	}
 }
 
@@ -32,11 +30,17 @@ func Connect(amqpURI string) (*RMQConn, error) {
 	// Attempt to connect to RabbitMQ, Hopefully it is running
 	// TODO: Create a retry ticker for the inital connection.
 	conn, err := amqp.Dial(amqpURI)
-	failOnError(err, "Failed to connect to RabbitMQ")
+	if err != nil {
+		log.Warn("Failed to connect to RabbitMQ")
+		return nil, err
+	}
 	log.Infof("Connected to RabbitMQ on  %s", amqpURI)
 
 	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
+	if err != nil {
+		log.Warn("Failed to open a channel")
+		return nil, err
+	}
 
 	err = ch.ExchangeDeclare(
 		EXCHANGE, // name
@@ -47,7 +51,10 @@ func Connect(amqpURI string) (*RMQConn, error) {
 		false,    // noWait
 		nil,      // arguments
 	)
-	failOnError(err, "Failed to declare the Exchange")
+	if err != nil {
+		log.Warn("Failed to declare the Exchange")
+		return nil, err
+	}
 	log.Infof("Declaring/Connecting to RabbitMQ Exchange on  %s", EXCHANGE)
 
 	var q amqp.Queue
@@ -60,7 +67,10 @@ func Connect(amqpURI string) (*RMQConn, error) {
 		false,           // noWait
 		nil,             // arguments
 	)
-	failOnError(err, "Error declaring the Queue")
+	if err != nil {
+		log.Warn("Error declareing the Queue")
+		return nil, err
+	}
 
 	log.Printf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
 		q.Name, q.Messages, q.Consumers, "a-key")
@@ -72,7 +82,10 @@ func Connect(amqpURI string) (*RMQConn, error) {
 		false,    // noWait
 		nil,      // arguments
 	)
-	failOnError(err, "Error binding to the Queue")
+	if err != nil {
+		log.Warn("Error binding to the Queue")
+		return nil, err
+	}
 
 	log.Printf("Queue bound to Exchange, starting Consume (consumer tag %q)", "license-manager")
 
@@ -90,7 +103,7 @@ func (c *RMQConn) Consume() <-chan amqp.Delivery {
 		false,             // no-wait
 		nil,               // args
 	)
-	failOnError(err, "Error consuming the Queue")
+	warnOnError(err, "Error consuming the Queue")
 	return replies
 }
 
