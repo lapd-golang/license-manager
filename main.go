@@ -7,6 +7,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/sevren/test/db"
 	"github.com/sevren/test/rabbit"
+	_ "github.com/sevren/test/swaggerui"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,7 +29,7 @@ func main() {
 	// You can still use the REST interface
 	conn, err := rabbit.Connect(*amqpURI)
 	if err != nil {
-		log.Warnf("Challenge 3 features disabled. Could not connect to rabbitmq \n", err)
+		log.Warnf("Challenge 3 features disabled. Could not connect to rabbitmq: %s \n", err)
 	}
 
 	if conn != nil {
@@ -40,6 +41,9 @@ func main() {
 	if challenge3features {
 		log.Info("Challenge 3 features enabled. Licenses will generate more uniquely")
 	}
+
+	go serveSwaggerUI(9090)
+	log.Info("Swaggerui endpoint running: http://localhost:9090/swaggerui")
 
 	router, err := Routes(dbc, challenge3features)
 	if err != nil {
