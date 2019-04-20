@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/render"
 	"github.com/sevren/test/core"
+	log "github.com/sirupsen/logrus"
 )
 
 type LicenseResp struct {
@@ -21,6 +22,7 @@ type ErrorResponse struct {
 }
 
 const USER_KEY = "user"
+const CHALLENGE_3_KEY = "challenge3-features"
 
 func (store *Dao) HandleLicenses(w http.ResponseWriter, r *http.Request) {
 
@@ -40,6 +42,20 @@ func (store *Dao) HandleLicenses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	l := core.GenerateLicenses(licenseRefs)
+	challenge3features, ok := r.Context().Value(CHALLENGE_3_KEY).(bool)
+	if !ok {
+		challenge3features = false
+	}
+
+	l := []string{}
+
+	if !challenge3features {
+		log.Info("Now generating licenses with Challenge 1 features")
+		l = core.GenerateLicenses(licenseRefs)
+	} else {
+		log.Info("Now generating licenses with Challenge 3 features")
+		l = core.GenerateBetterLicenses(user, licenseRefs)
+	}
+
 	render.JSON(w, r, LicenseResp{l})
 }

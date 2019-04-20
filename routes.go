@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/sevren/test/middlewares"
 	"github.com/sevren/test/storage"
 
 	"github.com/go-chi/chi"
@@ -14,13 +15,19 @@ import (
 
 type EmptyResponse struct{}
 
-func Routes(store storage.ItemStore) (*chi.Mux, error) {
+func Routes(store storage.ItemStore, challenge3features bool) (*chi.Mux, error) {
 
 	corsConf := corsConfig()
 	r := chi.NewRouter()
 	r.Use(corsConf.Handler)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 	r.Use(middleware.Logger)
+
+	// If rabbitmq is connected then we can use challenge 3 stuff
+	// this sets a middleware which adds the challenge 3 context to the request.
+	if challenge3features {
+		r.Use(middlewares.Challenge3(challenge3features))
+	}
 
 	r.Route("/{user}", func(r chi.Router) {
 		r.Post("/", handleUser)

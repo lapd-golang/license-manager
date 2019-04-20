@@ -16,35 +16,32 @@ var (
 
 func main() {
 
+	challenge3features := false
 	flag.Parse()
-
-	// Attempt to connect to rabbitmq upon start up
-	conn, err := rabbit.Connect(*amqpURI)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	r := conn.Consume()
 
 	// Attempt to connect to the sqllite3 database
 	dbc, err := db.Connect("user_licenses.db")
 	defer dbc.DB.Close()
 
-	go conn.Handle(r, dbc)
-	// go func(deliveries <-chan amqp.Delivery) {
-	// 	for d := range deliveries {
-	// 		log.Printf(
-	// 			"got %dB delivery: [%v] %s",
-	// 			len(d.Body),
-	// 			d.DeliveryTag,
-	// 			d.Body,
-	// 		)
-	// 	}
-	// }(r)
+	// Attempt to connect to rabbitmq upon start up
+	// If rabbitmq can not be connected then challenge 3 stuff is disabled
+	// You can still use the REST interface
+	conn, err := rabbit.Connect(*amqpURI)
+	if err != nil {
+		log.Warnf("Challenge 3 features disabled. Could not connect to rabbitmq \n", err)
+	}
 
-	//TODO go routine which listens to rabbitMQ messages
+	if conn != nil {
+		r := conn.Consume()
+		go conn.Handle(r, dbc)
+		challenge3features = true
+	}
 
-	router, err := Routes(dbc)
+	if challenge3features {
+		log.Info("Challenge 3 features enabled. Licenses will generate more uniquely")
+	}
+
+	router, err := Routes(dbc, challenge3features)
 	if err != nil {
 		log.Fatal(err)
 	}
