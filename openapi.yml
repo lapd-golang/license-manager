@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: License manager
+  description: License Manager API for GoGet Test
+  version: 0.0.1
+
+servers:
+  - url: http://localhost:8080/
+    description: Local development server
+
+components:
+  schemas:
+    User:    # Schema name
+      type: object
+      properties:
+        password:
+          type: string
+          example: qwerty  # Property example
+
+paths:
+  /{user}/licenses:
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      summary: Retrieves the licenses tied to the user account
+      parameters:
+        - in: path
+          name: user   # Note the name is the same as in the path
+          required: true
+          schema:
+            type: string
+            minimum: 1
+          description: The user ID
+          example: john
+      requestBody:
+        required:
+        content:
+          application/json:
+            schema:             # Request body contents
+              $ref: '#/components/schemas/User'   # Reference to an object
+            examples:    # Child of media type
+              lisa:   # Example 1
+                value:
+                  password: s3cr3t
+              john:       # Example 2
+                value:
+                  name: qwerty
+      responses:
+        '200':
+          description: Successful license
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: User is denied access
+          content:
+            application/json:
+              schema:
+                type: object
+        default:
+          description: Unexpected error
+  

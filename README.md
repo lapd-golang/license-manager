@@ -3,6 +3,11 @@ This is a go microservice featuring a REST controller and a connection to Rabbit
 
 * by default it attempts to connect to the following RabbitMQ address: amqp://guest:guest@localhost:5672/ (You can override this via a command line switch `-amqp`)
 
+## BONUS!
+There is a swaggerui endpoint being served on http://localhost:9090/swaggerui
+
+You can make a request to the /{user}/licenses endpoint
+
 ## Regarding Challenge 3 
 
 This code also contains code to connect to the rabbitMQ server. It will connect to the exchange `data` and consume messages. 
@@ -34,6 +39,11 @@ If the microservice is running with out a connection to rabbitMQ the licenses wi
 
 If the microservice is running with the connection to rabbitMQ then the licenses will be generated the challenge 3  hashid code using a salt of the username:license
 
+## Swagger ui
+
+There is a swaggerui endpoint available at the following address once the microservice is started up
+
+http://localhost:9090/swaggerui
 
 ## Building
 To build from source you require the following: 

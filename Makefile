@@ -1,10 +1,12 @@
 # Set an output prefix, which is the local directory if not specified
 PREFIX?=$(shell pwd)
 
+#Swagger ui
+SWAGGERUIVERSION := 3.20.5
+
 # Setup name variables for the package/tool
 NAME := license-manager
 DOCKERTAG := lic-man
-DOCKERREG := 
 
 # Set any default go build tags
 BUILDTAGS :=
@@ -90,3 +92,17 @@ clean: ## Cleanup any build binaries or packages
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: swaggerui-download
+swaggerui-download: ## Downloads swaggerui release
+	@curl -L https://github.com/swagger-api/swagger-ui/archive/v$(SWAGGERUIVERSION).zip --output /tmp/v$(SWAGGERUIVERSION).zip
+	@unzip -o -d /tmp/ /tmp/v$(SWAGGERUIVERSION).zip
+	@mkdir -p swaggerui
+
+.PHONY: swaggerui
+swaggerui: swaggerui-download ## Generates static files for swaggerui
+	@GO111MODULE=off $(GO) get github.com/rakyll/statik
+	cp openapi.yml /tmp/swagger-ui-$(SWAGGERUIVERSION)/dist/openapi.yml
+	# Change the swaggerui config file to point to our openapi.yml definition file and also set the redirect url
+	sed -i -e 's|url: "https://petstore.swagger.io/v2/swagger.json",|url: "./openapi.yml",\n\toauth2RedirectUrl: window.location.origin + window.location.pathname + "oauth2-redirect.html",|g' /tmp/swagger-ui-3.20.5/dist/index.html
+	statik -f -c="Static assets for swaggerui v$(SWAGGERUIVERSION)" -src=/tmp/swagger-ui-$(SWAGGERUIVERSION)/dist -dest=. -p=swaggerui
