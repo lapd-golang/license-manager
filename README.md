@@ -3,6 +3,24 @@ This is a go microservice featuring a REST controller and a connection to Rabbit
 
 * by default it attempts to connect to the following RabbitMQ address: amqp://guest:guest@localhost:5672/ (You can override this via a command line switch `-amqp`)
 
+## Quick Start
+
+There is a prebuilt image avialable from dockerhub
+
+If you wish to run with Challenge 3 stuff run this 
+
+`docker run -d -p 5672:5672 -p 15672:15672 -it rabbitmq:3.7-management-alpine`
+
+before you run the license-mamager
+
+`docker run -p 8080:8080 -p 9090:9090 -it sevren/license-manager`
+
+Or you can run the code directly (if you have go installed)
+
+`go run .`
+
+Once it starts you have a REST controller listening on http://localhost:8080
+
 ## BONUS!
 There is a swaggerui endpoint being served on http://localhost:9090/swaggerui
 

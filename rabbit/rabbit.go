@@ -1,5 +1,8 @@
 package rabbit
 
+//This file is responsible for providing all the functionality for connecting and consuming messages from RabbitMQ
+// RabbitMQ is part of the Challenge 3.
+
 import (
 	"encoding/json"
 

@@ -32,6 +32,7 @@ func main() {
 		log.Warnf("Challenge 3 features disabled. Could not connect to rabbitmq: %s \n", err)
 	}
 
+	// If rabbitMQ connection is active start consuming messages
 	if conn != nil {
 		r := conn.Consume()
 		go conn.Handle(r, dbc)
@@ -49,7 +50,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Info("Now listening on localhost:8080..")
+	log.Info("Now listening on http://localhost:8080/")
 	log.Fatal(http.ListenAndServe(":8080", router))
 
 }

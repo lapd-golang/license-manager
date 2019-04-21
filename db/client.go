@@ -1,5 +1,8 @@
 package db
 
+// This file is responsible for providing the database functions
+// The REST controllers handling methods will call these
+
 import (
 	"errors"
 

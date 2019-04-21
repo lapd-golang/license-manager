@@ -20,6 +20,9 @@ type PostReq struct {
 // if unsucessful the request is shutdown immediatly
 func (d *Dao) AuthUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// attempts to decode the JSON body
+		// This maps to a POST body {"password":"something"}
 		decoder := json.NewDecoder(r.Body)
 		var p PostReq
 		err := decoder.Decode(&p)
@@ -27,14 +30,19 @@ func (d *Dao) AuthUser(next http.Handler) http.Handler {
 			panic(err)
 		}
 
+		// extracts the username from the url
 		user := chi.URLParam(r, "user")
 
+		// looks up in the database the user and attempts to match the password
+		// if this fails we get 403, forbidden and no response
 		u := models.User_licenses{}
 		if err = d.DB.Where(&models.User_licenses{Username: user, Password: p.Password}).First(&u).Error; err != nil {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
 
+		// Pass the "authenticated" user in the context down to the next handler
+		// In our case the HandleLicenses function from the db package would be called next.
 		ctx := context.WithValue(r.Context(), "user", u.Username)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

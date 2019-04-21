@@ -1,5 +1,8 @@
 package core
 
+// This file contains functions to generate the users licenses
+// If Challenge 3 features are enabled then we will use the GenerateBetterLicenses
+
 import (
 	"encoding/base64"
 	"fmt"
@@ -8,6 +11,7 @@ import (
 )
 
 // Generates Challenge1 licenses
+// Generate a base64 encoded value for each license the user has in the database
 func GenerateLicenses(refs []string) []string {
 	licenses := []string{}
 	for _, license := range refs {

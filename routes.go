@@ -1,5 +1,7 @@
 package main
 
+// This file is responsible for setting up the REST controller and the handlers
+
 import (
 	"net/http"
 
@@ -17,11 +19,16 @@ type EmptyResponse struct{}
 
 func Routes(store storage.ItemStore, challenge3features bool) (*chi.Mux, error) {
 
+	// CORS configuration
 	corsConf := corsConfig()
+
 	r := chi.NewRouter()
+
+	// Set up the middlewares which each request will pass through
 	r.Use(corsConf.Handler)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
 	// If rabbitmq is connected then we can use challenge 3 stuff
 	// this sets a middleware which adds the challenge 3 context to the request.
@@ -29,6 +36,8 @@ func Routes(store storage.ItemStore, challenge3features bool) (*chi.Mux, error) 
 		r.Use(middlewares.Challenge3(challenge3features))
 	}
 
+	// Sets up the REST controller
+	// endpoints are /{user} and /{user}/licenses
 	r.Route("/{user}", func(r chi.Router) {
 		r.Post("/", handleUser)
 		r.Route("/licenses", func(r chi.Router) {
